@@ -8,6 +8,7 @@ pub enum WsdlError {
     Parse(xmltree::ParseError),
     ElementNotFound(&'static str),
     AttributeNotFound(&'static str),
+    AttributeNotFoundS(String),
     NotAnElement,
     Empty,
 }
@@ -109,10 +110,11 @@ pub fn parse(bytes: &[u8]) -> Result<Wsdl, WsdlError> {
 
     for elem in types_el.children.iter().filter_map(|c| c.as_element()) {
         trace!("type: {:#?}", elem);
+        let elemc = elem.clone();
         let name = elem
             .attributes
             .get("name")
-            .ok_or(WsdlError::AttributeNotFound("name"))?;
+            .ok_or(WsdlError::AttributeNotFoundS(format!("name {:#?}", elemc)))?;
 
         // sometimes we have <element name="TypeName"><complexType>...</complexType></element>,
         // sometimes we have <complexType name="TypeName">...</complexType>
