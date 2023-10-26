@@ -1,5 +1,6 @@
 use crate::wsdl::{parse, SimpleType, Type, Wsdl};
 use case::CaseExt;
+use core::panic;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use std::{fs::File, io::Write};
 
@@ -47,7 +48,14 @@ pub fn gen_write(path: &str, out: &str) -> Result<(), ()> {
     let out_path = format!("{}/example.rs", out);
     let v = std::fs::read(path).unwrap();
     let mut output = File::create(out_path).unwrap();
-    let wsdl = parse(&v[..]).unwrap();
+    // let wsdl = parse(&v[..]).unwrap();
+    let wsdl = match parse(&v[..]) {
+        Ok(wsdl) => wsdl,
+        Err(e) => {
+            eprintln!("cannot parse {:?}", e);
+            panic!("");
+        }
+    };
     let generated = gen(&wsdl).unwrap();
     output.write_all(generated.as_bytes()).unwrap();
     output.flush().unwrap();
